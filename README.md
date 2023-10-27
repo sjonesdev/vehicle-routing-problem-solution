@@ -37,12 +37,10 @@ more nodes except the depot can be added, which is when the path ends.
 
 ## Running
 
-This program was developed on a M1 Macbook Pro and compiled using Clang, 
-but I do not believe there are any portability concerns, even with using 
-gcc instead (unsure about msvc). To build the program, run the build.sh
+This program was developed with Clang and CMake. To build the program, run the build.sh
 script. 
 
-An executable "Main" will be deposited into the build directory. This will read all the files from the "Training Problems" folder and solve them one by one.
+An executable "Main" will be deposited into the build directory. This will read all the problem file provided via command line argument and print a solution.
 
 If not via build script, run these commands.
 - `mkdir build`
