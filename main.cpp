@@ -3,15 +3,11 @@
 #include <vector>
 #include <string>
 #include <unordered_set>
-#include <cstdlib>
-#include <ctime>
-#include <algorithm>
-#include <random>
-#include <limits>
 #include <iostream>
 #include <math.h>
+#include <numeric>
 
-#define MAX_PATH_LEN 720
+#define MAX_PATH_LEN 720.0
 #define PROBLEMS_DIR "Training Problems"
 
 typedef struct {
@@ -31,6 +27,7 @@ typedef struct {
     size_t index;
 } Node;
 
+// nodes sorted by index
 typedef std::vector<Node> Graph;
 
 typedef std::vector<Node> Route;
@@ -114,7 +111,7 @@ Solution nearestNeighborSolution(Graph& graph, double_t maxPathLength) {
                 break;
             }
             path.push_back(graph[nearest]);
-            pathLength += currentNode.edges[nearest];
+            pathLength += currentNode.edges[nearest] + graph[nearest].weight;
             unvisited.erase(nearest);
         }
         path.push_back(graph[0]);
@@ -135,8 +132,6 @@ Solution nearestNeighborSolution(Graph& graph, double_t maxPathLength) {
  * file path and returns a solution to the problem.
 */
 Solution solveProblem(std::string problemPath) {
-    std::cout << "Reading problem from " << problemPath << std::endl;
-
     // 0,0 is the depot
     std::vector<Load> loads {
         Load{
@@ -187,28 +182,33 @@ Solution solveProblem(std::string problemPath) {
 
 
 /**
- * Solves problems specified by files in PROBLEMS_DIR directory and outputs 
- * the average time to solve the problems and the average cost of the solutions.
+ * Solves problem in file of command line argument
 */
-int main() {
-    double_t totalTime = 0;
-    double_t totalCost = 0;
-    size_t numProblems = 0;
-    for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(PROBLEMS_DIR)) {
-        auto start = std::chrono::system_clock::now();
+int main(int argc, char** argv) {
 
-        auto plan = solveProblem(dirEntry.path());
-        auto cost = solutionCost(plan.lengths, 500);
-        totalCost += cost;
-
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double_t> elapsed_seconds = end-start;
-        totalTime += elapsed_seconds.count();
-        numProblems++;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <problem file path>\n";
+        return 1;
     }
 
-    std::cout << "Average time to solve problem: " << totalTime / numProblems << "s\n";
-    std::cout << "Average cost: " << totalCost / numProblems << "\n";
+    auto solution = solveProblem(argv[1]);
+
+    std::string printStr = "";
+    for(size_t i = 0; i < solution.routes.size(); i++) {
+        auto& route = solution.routes[i];
+        printStr += "[";
+        // exclude depot from print
+        for(size_t j = 1; j < solution.routes[i].size()-1; j++) {
+            auto& node = route[j];
+            printStr += std::to_string(solution.routes[i][j].index);
+            if(j < solution.routes[i].size() - 2) {
+                printStr += ",";
+            }
+        }
+        printStr += "]\n";
+    }
+
+    std::cout << printStr;
 
     return 0;
 }
